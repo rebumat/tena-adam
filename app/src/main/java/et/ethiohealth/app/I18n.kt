@@ -8,7 +8,7 @@ package et.ethiohealth.app
 object I18n {
     private val t: Map<String, List<String>> = mapOf(
         "tagline" to listOf("Your Health, One Platform", "ጤናዎ፣ በአንድ መድረክ", "Fayyaa Kee, Waltajjii Tokko Irratti", "ጥዕናኹም፣ ኣብ ሓደ መድረኽ"),
-        "hello" to listOf("Hello, Rebuma", "ሰላም ረቡማ", "Akkam, Rebuma", "ሰላም ረቡማ"),
+        "hello" to listOf("Hello", "ሰላም", "Akkam", "ሰላም"),
         "how_help" to listOf("How can we help you today?", "ዛሬ እንዴት ልንረዳዎ እንችላለን?", "Har'a akkamitti si gargaaruu dandeenya?", "ሎሚ ብኸመይ ክንሕግዘኩም ንኽእል?"),
         "home" to listOf("Home", "መነሻ", "Fuula Jalqabaa", "መበገሲ"),
         "finder" to listOf("Find a Hospital", "ሆስፒታል ፈልግ", "Hospitaala Barbaadi", "ሆስፒታል ድለ"),
@@ -102,6 +102,7 @@ object I18n {
         "about" to listOf("About", "ስለ እኛ", "Waa'ee", "ብዛዕባ"),
         "health_system" to listOf("Health System", "የጤና ስርዓት", "Sirna Fayyaa", "ስርዓት ጥዕና"),
         "prototype_v11" to listOf("Prototype v1.1 – offline demo", "ፕሮቶታይፕ v1.1 – ከመስመር ውጭ ማሳያ", "Piroototaayippii v1.1 – fakkeenya offline", "ፕሮቶታይፕ v1.1 – ብዘይ መስመር ኣብነት"),
+        "prototype_v12" to listOf("Prototype v1.2 – offline demo", "ፕሮቶታይፕ v1.2 – ከመስመር ውጭ ማሳያ", "Piroototaayippii v1.2 – fakkeenya offline", "ፕሮቶታይፕ v1.2 – ብዘይ መስመር ኣብነት"),
         "fictional_sample" to listOf("Fictional sample", "ልብወለድ ናሙና", "Fakkeenya malee", "ናይ ልብወለድ ኣብነት"),
         "fictional_facility" to listOf("Fictional sample facility", "ልብወለድ ናሙና ተቋም", "Dhaabbata fakkeenyaa", "ተቋም ናይ ልብወለድ ኣብነት"),
         "real_hospital_note" to listOf("Real hospital name · specialties/services are demo data – verify", "የእውነተኛ ሆስፒታል ስም · ልዩ ሙያዎች/አገልግሎቶች የማሳያ መረጃ ናቸው – ያረጋግጡ", "Maqaan hospitaala dhugaa · ogummaa/tajaajilli odeeffannoo fakkeenyaa dha – mirkaneessaa", "ሽም ሆስፒታል ሓቂ · ፍሉይ ሞያ/ኣገልግሎት ናይ ኣብነት ሓበሬታ እዩ – ኣረጋግጽ"),
