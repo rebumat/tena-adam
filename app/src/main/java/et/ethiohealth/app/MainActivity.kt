@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FamilyRestroom
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.filled.Sos
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,7 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Tena Adam v1.1.0 — entry point.
+ * Tena Adam v1.2.0 — entry point.
  *
  * Navigation is a simple in-memory back-stack (like v0.1.0). Bottom bar
  * follows the v0.2 screenshots: Home / Assistant / SOS / Profile & Family.
@@ -106,12 +113,13 @@ sealed class Route {
     object HealthSystem : Route()
 }
 
-/** Bottom navigation items (icon emoji, label key, target route). */
+/** Bottom navigation items (icon, label key, target route). v1.2.0 uses proper
+ *  vector icons instead of emoji, for a more professional look. */
 private val BOTTOM_NAV = listOf(
-    Triple("🏠", "home", Route.Home),
-    Triple("🤖", "assistant", Route.Assistant),
-    Triple("🚨", "sos", Route.Emergency),
-    Triple("👨‍👩‍👧", "profile_family", Route.Profile)
+    Triple(Icons.Filled.Home, "home", Route.Home),
+    Triple(Icons.Filled.SmartToy, "assistant", Route.Assistant),
+    Triple(Icons.Filled.Sos, "sos", Route.Emergency),
+    Triple(Icons.Filled.FamilyRestroom, "profile_family", Route.Profile)
 )
 
 fun titleKey(route: Route): String = when (route) {
@@ -220,17 +228,39 @@ fun TenaAdamApp(store: Store) {
                         }
                     },
                     actions = {
-                        // SOS shortcut (red) — always visible.
-                        IconButton(onClick = { go(Route.Emergency) }) {
-                            Text("🆘", fontSize = 22.sp)
+                        // SOS shortcut — red pill button, always visible.
+                        Button(
+                            onClick = { go(Route.Emergency) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = EthRed,
+                                contentColor = Color.White
+                            ),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                            modifier = Modifier.height(36.dp),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text("SOS", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
-                        // Language switcher — cycles en → am → om → ti.
-                        IconButton(onClick = {
-                            val next = Lang.values()[(lang.ordinal + 1) % Lang.values().size]
-                            store.lang = next
-                            lang = next
-                        }) {
-                            Text("🌐 " + lang.code.uppercase(), color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        // Language switcher — pill button, cycles en → am → om → ti.
+                        // (Was an IconButton: the "🌐 EN" text was wider than 48dp and clipped.)
+                        Button(
+                            onClick = {
+                                val next = Lang.values()[(lang.ordinal + 1) % Lang.values().size]
+                                store.lang = next
+                                lang = next
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White.copy(alpha = 0.18f),
+                                contentColor = Color.White
+                            ),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                            modifier = Modifier.height(36.dp),
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Text("🌐", fontSize = 14.sp)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(lang.code.uppercase(), fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Teal)
@@ -240,7 +270,7 @@ fun TenaAdamApp(store: Store) {
         },
         bottomBar = {
             NavigationBar(containerColor = Color.White) {
-                BOTTOM_NAV.forEach { (emoji, labelKey, route) ->
+                BOTTOM_NAV.forEach { (icon, labelKey, route) ->
                     val selected = when (route) {
                         Route.Home -> current is Route.Home
                         Route.Assistant -> current is Route.Assistant
@@ -253,7 +283,13 @@ fun TenaAdamApp(store: Store) {
                         onClick = {
                             if (route is Route.Home) goRoot(Route.Home) else go(route)
                         },
-                        icon = { Text(emoji, fontSize = 20.sp) },
+                        icon = {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = tr(labelKey),
+                                tint = if (selected) Teal else DarkTeal.copy(alpha = 0.55f)
+                            )
+                        },
                         label = { Text(tr(labelKey), fontSize = 11.sp, color = if (selected) Teal else DarkTeal) }
                     )
                 }
@@ -264,7 +300,13 @@ fun TenaAdamApp(store: Store) {
                 FloatingActionButton(
                     onClick = { go(Route.Assistant) },
                     containerColor = Color(0xFF1565C0)
-                ) { Text("🤖", fontSize = 24.sp) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.SmartToy,
+                        contentDescription = tr("assistant"),
+                        tint = Color.White
+                    )
+                }
             }
         }
     ) { padding ->
@@ -349,13 +391,23 @@ fun DisclaimerText(lang: Lang) {
 
 @Composable
 fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        fontSize = 17.sp,
-        fontWeight = FontWeight.Bold,
-        color = DarkTeal,
-        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-    )
+    Row(
+        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 4.dp, height = 20.dp)
+                .background(Teal, RoundedCornerShape(2.dp))
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Bold,
+            color = DarkTeal
+        )
+    }
 }
 
 /** A white rounded card with an emoji icon, title and subtitle. */
