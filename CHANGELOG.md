@@ -1,11 +1,29 @@
 # Changelog — Tena Adam (ጤናአዳም)
 
+## v1.2.0 — 2026-11-26 (professional UI redesign)
+
+- Home screen redesigned to look more attractive and professional: hero card
+  now shows the full Option 3 logo in a white chip above the greeting,
+  search bar has a search icon and a matching-height Search button, AI
+  Assistant banner uses a proper icon in a blue circle, section titles have
+  a teal accent bar, tiles have soft tinted icon circles (cycling palette),
+  and "No upcoming appointments" is a proper card instead of plain text.
+- Top bar: SOS and language are now pill buttons (the old IconButton clipped
+  the "🌐 EN" text — it was wider than 48dp). Bottom navigation and the
+  floating Assistant button now use proper vector icons (Home, SmartToy, Sos,
+  FamilyRestroom) instead of emoji. versionCode 4.
+- Fixed: greeting said "Hello, Rebuma, Rebuma" — the I18n "hello" string
+  already contained the name; it is now just "Hello" / "ሰላም" / "Akkam" /
+  "ሰላም" and the name is added once.
+- Fixed: long tile titles (e.g. "Ratings & Reviews") could clip mid-word;
+  titles and subtitles now use ellipsis.
+
 ## v1.1.1 — 2026-11-26 (launcher icon)
 
 - Launcher icon changed to the **full Option 3 logo** (leaf + heartbeat +
--   ጤናአዳም + cross, on white) at the user's request — the v1.1.0 icon was the
--     simplified leaf + heartbeat + cross without the name. versionCode 3.
-- - Nothing else changed.
+  ጤናአዳም + cross, on white) at the user's request — the v1.1.0 icon was the
+  simplified leaf + heartbeat + cross without the name. versionCode 3.
+- Nothing else changed.
 
 ## v1.1.0 — 2026-11-26 (clean rewrite; built via GitHub Actions, release v1.1.0)
 
@@ -59,7 +77,9 @@ Renamed from **EthioHealth** to **ጤናአዳም (Tena Adam)**. Package stays
   nutrition, safe water)
 - About screen (logo, version 1.1.0, "Prototype — offline demo",
   disclaimer, "Built by Rebuma Tamiru Roro")
-- Option 3 logo (leaf + heartbeat + ጤናአዳም + cross) as About-screen logo; bright-green → deep-teal brand theme. (The v1.1.0 launcher icon was a simplified leaf + heartbeat + cross; v1.1.1 uses the full logo.)
+- Option 3 logo (leaf + heartbeat + ጤናአዳም + cross) as About-screen logo;
+  bright-green → deep-teal brand theme. (The v1.1.0 launcher icon was a
+  simplified leaf + heartbeat + cross; v1.1.1 uses the full logo.)
 
 ### Changed
 - Display name everywhere: ጤናአዳም (Tena Adam). The disclaimer now says
@@ -80,7 +100,9 @@ Renamed from **EthioHealth** to **ጤናአዳም (Tena Adam)**. Package stays
   calculation from the Meskel Square demo location.
 
 ### Notes / verified
-- **Built.** Built via GitHub Actions (release v1.1.0, APK verified: package et.ethiohealth.app, versionCode 2, versionName 1.1.0, 16.9 MB). Delivered to the user 2026-11-26; installed on his phone.
+- **Built.** Built via GitHub Actions (release v1.1.0, APK verified:
+  package et.ethiohealth.app, versionCode 2, versionName 1.1.0, 16.9 MB).
+  Delivered to the user 2026-11-26; installed on his phone.
   Static self-check (`check_static.py`) passes: 273 I18n keys, all keys
   used are defined, all drawables referenced exist, braces/parens balance,
   no decompiled-Java references, all 31 routes and 32 screens wired.
