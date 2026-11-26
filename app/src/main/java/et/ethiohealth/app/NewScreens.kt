@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -782,11 +784,11 @@ fun AiAssistantScreen(lang: Lang, store: Store) {
         }
         Text(tr("assistant_hint"), fontSize = 13.sp, color = DarkTeal.copy(alpha = 0.7f))
         Spacer(modifier = Modifier.height(12.dp))
-        androidx.compose.foundation.lazy.LazyColumn(
+        LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            androidx.compose.foundation.lazy.items(messages) { m ->
+            items(messages) { m ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = if (m.fromMe) Arrangement.End else Arrangement.Start
