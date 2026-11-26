@@ -1,6 +1,13 @@
 # Changelog — Tena Adam (ጤናአዳም)
 
-## v1.1.0 — 2026-11-26 (clean rewrite; NOT built yet — first build in Android Studio)
+## v1.1.1 — 2026-11-26 (launcher icon)
+
+- Launcher icon changed to the **full Option 3 logo** (leaf + heartbeat +
+-   ጤናአዳም + cross, on white) at the user's request — the v1.1.0 icon was the
+-     simplified leaf + heartbeat + cross without the name. versionCode 3.
+- - Nothing else changed.
+
+## v1.1.0 — 2026-11-26 (clean rewrite; built via GitHub Actions, release v1.1.0)
 
 Renamed from **EthioHealth** to **ጤናአዳም (Tena Adam)**. Package stays
 `et.ethiohealth.app` so existing installs update. versionCode 2.
@@ -52,8 +59,7 @@ Renamed from **EthioHealth** to **ጤናአዳም (Tena Adam)**. Package stays
   nutrition, safe water)
 - About screen (logo, version 1.1.0, "Prototype — offline demo",
   disclaimer, "Built by Rebuma Tamiru Roro")
-- Option 3 logo (leaf + heartbeat + ጤናአዳም + cross) as launcher icon and
-  About-screen logo; bright-green → deep-teal brand theme
+- Option 3 logo (leaf + heartbeat + ጤናአዳም + cross) as About-screen logo; bright-green → deep-teal brand theme. (The v1.1.0 launcher icon was a simplified leaf + heartbeat + cross; v1.1.1 uses the full logo.)
 
 ### Changed
 - Display name everywhere: ጤናአዳም (Tena Adam). The disclaimer now says
@@ -73,9 +79,8 @@ Renamed from **EthioHealth** to **ጤናአዳም (Tena Adam)**. Package stays
   vaccine schedule, condition/emergency keyword matching, distance
   calculation from the Meskel Square demo location.
 
-### Notes / not verified
-- **Not built.** No Gradle build was run (no network for dependencies in
-  the build environment). First build must happen in Android Studio.
+### Notes / verified
+- **Built.** Built via GitHub Actions (release v1.1.0, APK verified: package et.ethiohealth.app, versionCode 2, versionName 1.1.0, 16.9 MB). Delivered to the user 2026-11-26; installed on his phone.
   Static self-check (`check_static.py`) passes: 273 I18n keys, all keys
   used are defined, all drawables referenced exist, braces/parens balance,
   no decompiled-Java references, all 31 routes and 32 screens wired.
