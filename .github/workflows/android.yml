@@ -49,17 +49,17 @@ jobs:
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tena-adam-v1.1.0-apk
+          name: tena-adam-v1.1.1-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
       - name: Create release with APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.1.0
-          name: Tena Adam v1.1.0
+          tag_name: v1.1.1
+          name: Tena Adam v1.1.1
           body: |
-            Tena Adam (ጤናአዳም) v1.1.0 — Ethiopian health super app.
+            Tena Adam (ጤናአዳም) v1.1.1 — Ethiopian health super app.
             Debug APK built automatically by GitHub Actions.
           files: app/build/outputs/apk/debug/app-debug.apk
           draft: false
