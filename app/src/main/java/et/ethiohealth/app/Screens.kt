@@ -3,23 +3,31 @@ package et.ethiohealth.app
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,10 +38,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
@@ -123,20 +135,41 @@ fun HomeScreen(
     )
 
     ScrollScreen {
-        // Hero card (bright leaf green → deep teal gradient).
+        // Hero card (bright leaf green → deep teal gradient, v1.2.0 redesign):
+        // white chip with the Option 3 logo on top, then a clear greeting.
+        // The greeting used to read "Hello, Rebuma, Rebuma" because the
+        // I18n "hello" string already contained the name — fixed in v1.2.0.
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
                 modifier = Modifier
                     .background(heroGradient)
                     .padding(20.dp)
             ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.tena_adam_logo),
+                        contentDescription = "Tena Adam logo",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(14.dp))
                 Text("ጤናአዳም · Tena Adam", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("${tr("hello")}, $name", color = Color.White, fontSize = 16.sp)
+                Text("${tr("hello")}, $name", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                 Text(tr("tagline"), color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp)
                 Text(tr("how_help"), color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp)
             }
@@ -149,6 +182,7 @@ fun HomeScreen(
                 value = query,
                 onValueChange = { query = it },
                 placeholder = { Text(tr("search_hint"), fontSize = 13.sp) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = tr("search"), tint = Teal) },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
@@ -156,7 +190,9 @@ fun HomeScreen(
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = { go(Route.Finder(query.ifBlank { null })) },
-                colors = ButtonDefaults.buttonColors(containerColor = Teal)
+                colors = ButtonDefaults.buttonColors(containerColor = Teal),
+                modifier = Modifier.height(56.dp),
+                shape = RoundedCornerShape(12.dp)
             ) { Text(tr("search")) }
         }
         Spacer(modifier = Modifier.height(12.dp))
@@ -166,10 +202,23 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth().clickable { go(Route.Assistant) },
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
         ) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("🤖", fontSize = 28.sp)
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFBBDEFB)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.SmartToy,
+                        contentDescription = tr("assistant"),
+                        tint = Color(0xFF1565C0),
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(tr("assistant"), fontWeight = FontWeight.Bold, fontSize = 15.sp, color = DarkTeal)
@@ -203,15 +252,34 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
         } else {
-            Text(
-                tr("no_upcoming"),
-                fontSize = 12.sp,
-                color = DarkTeal.copy(alpha = 0.5f),
-                modifier = Modifier.padding(top = 12.dp)
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("📅", fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        tr("no_upcoming"),
+                        fontSize = 13.sp,
+                        color = DarkTeal.copy(alpha = 0.6f)
+                    )
+                }
+            }
         }
 
-        // The four v0.2 sections.
+        // The four v0.2 sections. Tiles get a soft tinted icon circle;
+        // the tint cycles through a small palette so the grid looks designed.
+        val tileTints = listOf(
+            Color(0xFFE0F2F1), Color(0xFFE3F2FD), Color(0xFFE8F5E9),
+            Color(0xFFFFF3E0), Color(0xFFF3E5F5), Color(0xFFFCE4EC)
+        )
+        var tileIndex = 0
         sections.forEach { (sectionKey, tiles) ->
             SectionTitle(tr(sectionKey))
             tiles.chunked(3).forEach { row ->
@@ -224,9 +292,11 @@ fun HomeScreen(
                             emoji = emoji,
                             title = tr(key),
                             subtitle = if (lang == Lang.AM) I18n.get(key, Lang.EN) else I18n.get(key, Lang.AM),
+                            tint = tileTints[tileIndex % tileTints.size],
                             modifier = Modifier.weight(1f),
                             onClick = { go(route) }
                         )
+                        tileIndex++
                     }
                     // Pad incomplete rows so tiles keep equal width.
                     repeat(3 - row.size) { Spacer(modifier = Modifier.weight(1f)) }
@@ -236,7 +306,7 @@ fun HomeScreen(
 
         DisclaimerText(lang)
         Text(
-            text = tr("prototype_v11"),
+            text = tr("prototype_v12"),
             color = DarkTeal.copy(alpha = 0.5f),
             fontSize = 12.sp,
             modifier = Modifier.fillMaxWidth(),
@@ -251,6 +321,7 @@ private fun HomeTile(
     emoji: String,
     title: String,
     subtitle: String?,
+    tint: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -264,14 +335,26 @@ private fun HomeTile(
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(emoji, fontSize = 26.sp)
-            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(tint),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(emoji, fontSize = 24.sp)
+            }
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = DarkTeal,
-                textAlign = TextAlign.Center, maxLines = 2, minLines = 2
+                textAlign = TextAlign.Center, maxLines = 2, minLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
             if (!subtitle.isNullOrBlank()) {
-                Text(subtitle, fontSize = 10.sp, color = DarkTeal.copy(alpha = 0.6f), textAlign = TextAlign.Center, maxLines = 1)
+                Text(
+                    subtitle, fontSize = 10.sp, color = DarkTeal.copy(alpha = 0.6f),
+                    textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
