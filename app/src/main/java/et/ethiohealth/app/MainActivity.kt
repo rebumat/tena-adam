@@ -43,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -118,6 +119,12 @@ sealed class Route {
     object Favourites : Route()
     object BpChart : Route()
     object Privacy : Route()
+    // v1.4.0: onboarding + new features.
+    object Onboarding : Route()
+    object SymptomChecker : Route()
+    object ApptCalendar : Route()
+    object VacReminders : Route()
+    object Sos : Route()
 }
 
 /** Bottom navigation items (icon, label key, target route). v1.2.0 uses proper
@@ -125,7 +132,7 @@ sealed class Route {
 private val BOTTOM_NAV = listOf(
     Triple(Icons.Filled.Home, "home", Route.Home),
     Triple(Icons.Filled.SmartToy, "assistant", Route.Assistant),
-    Triple(Icons.Filled.Sos, "sos", Route.Emergency),
+    Triple(Icons.Filled.Sos, "sos", Route.Sos),
     Triple(Icons.Filled.FamilyRestroom, "profile_family", Route.Profile)
 )
 
@@ -167,6 +174,11 @@ fun titleKey(route: Route): String = when (route) {
     Route.Favourites -> "favourites"
     Route.BpChart -> "chart_title"
     Route.Privacy -> "privacy"
+    Route.Onboarding -> "app_name"
+    Route.SymptomChecker -> "symptom_checker"
+    Route.ApptCalendar -> "appt_calendar"
+    Route.VacReminders -> "vac_reminders"
+    Route.Sos -> "sos"
 }
 
 /** Open the phone dialer with a number (never auto-dials). */
@@ -182,32 +194,60 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val store = Store(this)
+        // v1.4.0: the theme (light / dark) lives inside TenaAdamApp so the
+        // dark-mode toggle in Profile can switch it without restarting.
         setContent {
-            MaterialTheme(
-                colorScheme = lightColorScheme(
-                    primary = Teal,
-                    secondary = EthYellow,
-                    tertiary = LightBg,
-                    error = EthRed,
-                    background = LightBg,
-                    surface = Color.White
-                )
-            ) {
-                TenaAdamApp(store)
-            }
+            TenaAdamApp(store)
         }
     }
 }
+
+/** v1.4.0 Material 3 colour schemes: the same teal brand in light and dark. */
+val TenaLightScheme = lightColorScheme(
+    primary = Teal,
+    secondary = EthYellow,
+    tertiary = LightBg,
+    error = EthRed,
+    background = LightBg,
+    surface = Color.White,
+    onPrimary = Color.White,
+    onBackground = DarkTeal,
+    onSurface = DarkTeal
+)
+val TenaDarkScheme = darkColorScheme(
+    primary = Color(0xFF4DB6AC),
+    secondary = EthYellow,
+    tertiary = Color(0xFF1E2A28),
+    error = Color(0xFFFF8A80),
+    background = Color(0xFF121A19),
+    surface = Color(0xFF1E2A28),
+    onPrimary = Color(0xFF062B26),
+    onBackground = Color(0xFFE6F0ED),
+    onSurface = Color(0xFFE6F0ED)
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TenaAdamApp(store: Store) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var lang by remember { mutableStateOf(store.lang) }
+    var dark by remember { mutableStateOf(store.darkMode) }
+    var showOnboarding by remember { mutableStateOf(!store.onboardingDone) }
     var stack by remember { mutableStateOf(listOf<Route>(Route.Home)) }
     val current = stack.last()
     val canPop = stack.size > 1
     val tr: (String) -> String = { I18n.get(it, lang) }
+
+    MaterialTheme(
+        colorScheme = if (dark) TenaDarkScheme else TenaLightScheme
+    ) {
+    if (showOnboarding) {
+        OnboardingScreen(lang) {
+            store.onboardingDone = true
+            showOnboarding = false
+        }
+        return@MaterialTheme
+    }
 
     fun go(route: Route) {
         stack = stack + route
@@ -242,8 +282,9 @@ fun TenaAdamApp(store: Store) {
                     },
                     actions = {
                         // SOS shortcut — red pill button, always visible.
+                        // v1.4.0: opens the big one-tap SOS screen.
                         Button(
-                            onClick = { go(Route.Emergency) },
+                            onClick = { go(Route.Sos) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = EthRed,
                                 contentColor = Color.White
@@ -282,15 +323,18 @@ fun TenaAdamApp(store: Store) {
             }
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 BOTTOM_NAV.forEach { (icon, labelKey, route) ->
                     val selected = when (route) {
                         Route.Home -> current is Route.Home
                         Route.Assistant -> current is Route.Assistant
-                        Route.Emergency -> current is Route.Emergency
+                        Route.Sos -> current is Route.Sos
                         Route.Profile -> current is Route.Profile
                         else -> false
                     }
+                    // v1.4.0: SOS is red (selected or not) so it stands out;
+                    // other items use the teal brand colour when selected.
+                    val activeTint = if (route is Route.Sos) EthRed else MaterialTheme.colorScheme.primary
                     NavigationBarItem(
                         selected = selected,
                         onClick = {
@@ -300,10 +344,17 @@ fun TenaAdamApp(store: Store) {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = tr(labelKey),
-                                tint = if (selected) Teal else DarkTeal.copy(alpha = 0.55f)
+                                tint = if (selected) activeTint else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
                             )
                         },
-                        label = { Text(tr(labelKey), fontSize = 11.sp, color = if (selected) Teal else DarkTeal) }
+                        label = {
+                            Text(
+                                tr(labelKey),
+                                fontSize = 11.sp,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (selected) activeTint else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     )
                 }
             }
@@ -326,7 +377,7 @@ fun TenaAdamApp(store: Store) {
         Box(
             modifier = Modifier
                 .padding(padding)
-                .background(LightBg)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             when (val r = current) {
                 Route.Home -> HomeScreen(lang, store, ::go, ::goRoot)
@@ -357,7 +408,10 @@ fun TenaAdamApp(store: Store) {
                 Route.BpSugar -> BpSugarScreen(lang, store, ::go)
                 Route.Calculators -> HealthCalculatorsScreen(lang, store, ::go)
                 Route.Mental -> MentalWellbeingScreen(lang)
-                Route.Profile -> ProfileScreen(lang, store, ::go)
+                Route.Profile -> ProfileScreen(lang, store, ::go, dark) { newDark ->
+                    store.darkMode = newDark
+                    dark = newDark
+                }
                 Route.News -> HealthNewsScreen(lang)
                 Route.FutureAi -> FutureAiScreen(lang)
                 Route.Assistant -> AiAssistantScreen(lang, store)
@@ -369,9 +423,18 @@ fun TenaAdamApp(store: Store) {
                 Route.Favourites -> FavouritesScreen(lang, store)
                 Route.BpChart -> BpChartScreen(lang, store)
                 Route.Privacy -> PrivacyScreen(lang)
+                Route.Onboarding -> OnboardingScreen(lang) {
+                    store.onboardingDone = true
+                    showOnboarding = false
+                }
+                Route.SymptomChecker -> SymptomCheckerScreen(lang, store, ::go)
+                Route.ApptCalendar -> AppointmentCalendarScreen(lang, store, ::go)
+                Route.VacReminders -> VaccinationRemindersScreen(lang, store, ::go)
+                Route.Sos -> SosScreen(lang, store)
             }
         }
     }
+    } // close MaterialTheme
 }
 
 /** Ethiopian flag stripe (green / yellow / red), 4dp, from v0.1.0. */
@@ -402,7 +465,7 @@ fun DemoBadge(lang: Lang) {
 fun DisclaimerText(lang: Lang) {
     Text(
         text = I18n.get("disclaimer", lang),
-        color = DarkTeal.copy(alpha = 0.7f),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
         fontSize = 12.sp,
         modifier = Modifier.padding(vertical = 8.dp)
     )
@@ -424,7 +487,7 @@ fun SectionTitle(text: String) {
             text = text,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
-            color = DarkTeal
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -440,7 +503,7 @@ fun TileCard(
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -450,22 +513,22 @@ fun TileCard(
             Text(emoji, fontSize = 28.sp)
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = DarkTeal)
+                Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
                 if (subtitle != null) {
-                    Text(subtitle, fontSize = 12.sp, color = DarkTeal.copy(alpha = 0.65f))
+                    Text(subtitle, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f))
                 }
             }
         }
     }
 }
 
-/** Generic white information card. */
+/** Generic information card (theme surface, so it works in dark mode too). */
 @Composable
 fun InfoCard(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) { content() }

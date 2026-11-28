@@ -17,8 +17,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -646,7 +648,13 @@ fun MentalWellbeingScreen(lang: Lang) {
 // ---------------------------------------------------------------------------
 
 @Composable
-fun ProfileScreen(lang: Lang, store: Store, go: (Route) -> Unit) {
+fun ProfileScreen(
+    lang: Lang,
+    store: Store,
+    go: (Route) -> Unit,
+    darkMode: Boolean,
+    onDarkMode: (Boolean) -> Unit
+) {
     val tr: (String) -> String = { I18n.get(it, lang) }
     var name by remember { mutableStateOf(store.getString(Store.KEY_PROFILE_NAME, "Rebuma")) }
     var phone by remember { mutableStateOf(store.getString(Store.KEY_PROFILE_PHONE, "")) }
@@ -656,8 +664,28 @@ fun ProfileScreen(lang: Lang, store: Store, go: (Route) -> Unit) {
     var saved by remember { mutableStateOf(false) }
 
     ScrollScreen {
-        Text(tr("profile_title"), fontWeight = FontWeight.Bold, fontSize = 19.sp, color = DarkTeal)
+        Text(tr("profile_title"), fontWeight = FontWeight.Bold, fontSize = 19.sp, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(12.dp))
+        // v1.4.0: Settings — dark mode toggle (persisted in Store).
+        Text(tr("settings_title"), fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("🌙", fontSize = 22.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(tr("dark_mode"), fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                Switch(checked = darkMode, onCheckedChange = onDarkMode)
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(tr("your_name")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(tr("phone_number")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
@@ -709,6 +737,35 @@ fun ProfileScreen(lang: Lang, store: Store, go: (Route) -> Unit) {
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+        // v1.4.0: quick links to the new features.
+        TileCard(
+            emoji = "📅",
+            title = tr("appt_calendar"),
+            subtitle = null,
+            onClick = { go(Route.ApptCalendar) }
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        TileCard(
+            emoji = "💉",
+            title = tr("vac_reminders"),
+            subtitle = null,
+            onClick = { go(Route.VacReminders) }
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        TileCard(
+            emoji = "🩺",
+            title = tr("symptom_checker"),
+            subtitle = null,
+            onClick = { go(Route.SymptomChecker) }
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        TileCard(
+            emoji = "🚨",
+            title = tr("sos"),
+            subtitle = null,
+            onClick = { go(Route.Sos) }
+        )
+        Spacer(modifier = Modifier.height(10.dp))
         TileCard(
             emoji = "ℹ️",
             title = tr("about"),
