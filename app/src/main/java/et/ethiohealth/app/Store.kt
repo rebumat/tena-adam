@@ -57,6 +57,20 @@ class Store(context: Context) {
             putString(KEY_LANG, value.code)
         }
 
+    /** v1.4.0: dark mode, persisted. */
+    var darkMode: Boolean
+        get() = getString(KEY_DARK_MODE, "false") == "true"
+        set(value) {
+            putString(KEY_DARK_MODE, if (value) "true" else "false")
+        }
+
+    /** v1.4.0: true once the onboarding screens have been shown. */
+    var onboardingDone: Boolean
+        get() = getString(KEY_ONBOARDING_DONE, "false") == "true"
+        set(value) {
+            putString(KEY_ONBOARDING_DONE, if (value) "true" else "false")
+        }
+
     companion object {
         const val KEY_LANG = "lang"
         const val KEY_APPOINTMENTS = "appointments"
@@ -78,5 +92,10 @@ class Store(context: Context) {
         const val KEY_FAVOURITES = "favourites"
         const val KEY_CACHE_NEARBY = "cache_nearby"
         const val KEY_CACHE_AIR = "cache_air"
+        // v1.4.0: dark mode, onboarding shown flag, vaccines marked Done.
+        // KEY_VACCINE_DONE rows store {"key": "<weeks>_<vaccines>"}.
+        const val KEY_DARK_MODE = "dark_mode"
+        const val KEY_ONBOARDING_DONE = "onboarding_done"
+        const val KEY_VACCINE_DONE = "vaccine_done"
     }
 }

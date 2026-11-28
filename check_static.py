@@ -67,7 +67,11 @@ used |= {
 for k in ["chat_reply_1", "chat_reply_2", "chat_reply_3", "chat_reply_4",
           "breathe_in", "breathe_hold", "breathe_out",
           "fa_bleeding", "fa_bleeding_body", "fa_burns", "fa_burns_body",
-          "fa_choking", "fa_choking_body", "fa_fainting", "fa_fainting_body"]:
+          "fa_choking", "fa_choking_body", "fa_fainting", "fa_fainting_body",
+          # v1.4.0 symptom keys: looked up via I18n.get(item.key, lang).
+          "sym_fever", "sym_cough", "sym_headache", "sym_chest_pain",
+          "sym_breath", "sym_stomach", "sym_skin_rash", "sym_sore_throat",
+          "sym_bleeding", "sym_dizziness", "sym_joint_pain", "sym_baby_fever"]:
     used.add(k)
 missing = sorted(used - defined_set)
 if missing:

@@ -1,4 +1,4 @@
-# ጤናአዳም — Tena Adam v1.3.0
+# ጤናአዳም — Tena Adam v1.4.0
 
 **Your Health, One Platform** — a professional "super app for health care" for Ethiopia.
 
@@ -10,10 +10,46 @@ with demo data stored only on the phone, and **online** it adds live data
 from free public APIs (see "New in v1.3.0" below) with offline fallback.
 
 - Package: `et.ethiohealth.app` (same as v0.1.0, so existing installs update)
-- Version: **1.3.0** (versionCode 5), minSdk 26 (Android 8.0+), targetSdk 34
+- Version: **1.4.0** (versionCode 6), minSdk 26 (Android 8.0+), targetSdk 34
 - Stack: Kotlin 2.0.0, Jetpack Compose (BOM 2024.09.00), Material 3,
   Retrofit 2.11.0 + OkHttp + Gson, kotlinx-coroutines-android 1.8.1
 - Built by: Rebuma Tamiru Roro
+
+## New in v1.4.0 — more features, more attractive UI
+
+- **Splash / onboarding** — logo, tagline and 3 swipeable cards (Find care,
+  Talk to a doctor, Track your health) with Skip / Get started, shown once.
+- **Home redesign** — gradient hero with greeting and search, quick-action
+  chips (Find hospital, Doctor, Live nearby, SOS), a daily health tip that
+  rotates through the education articles, and section tiles with soft tinted
+  icons. Hospital and doctor cards now have initials avatars, rounder
+  corners (20dp) and more elevation.
+- **Dark mode** — a toggle in Profile & Family → Settings, saved on the
+  phone, applied through a proper Material 3 light + dark colour scheme
+  (same teal brand, dark teal surfaces in dark mode). Shared cards, the
+  bottom bar and the top-level screens follow the scheme.
+- **Bottom navigation** — proper icons + bold labels when selected, and the
+  SOS item is red so it stands out. The top SOS pill now opens the new
+  one-tap SOS screen.
+- **Appointment calendar** — a month grid of saved appointments, tap a day
+  to see its appointments, add / cancel, and a days-until countdown.
+  Reminder choice: in-app upcoming list + a notification-permission
+  request. No AlarmManager / WorkManager yet — that needs a receiver and
+  notification channel, so it was deliberately left out to keep the CI
+  build safe.
+- **Vaccination reminders** — the EPI schedule from the child's birth date
+  with due / overdue / done states; tap to mark a vaccine Done (saved on
+  the phone). Enter the birth date in Mother & Child first.
+- **Symptom checker (non-diagnostic)** — pick symptoms, get a suggested
+  specialty and hospitals that can help. Emergency symptoms show the
+  emergency banner and a call-907 button. The "does not diagnose"
+  disclaimer is always shown.
+- **Daily health tip** — on Home, rotating through the education articles
+  by day of year; tap to open the full article.
+- **One-tap SOS** — a big red SOS screen with 907 / 911 / 991 / 939 as
+  large tap-to-call cards, plus Share my location using the last-known GPS
+  location (permission requested first; Meskel Square demo location is
+  shared — and labelled as such — when GPS is unavailable).
 
 ## New in v1.3.0 — live data, free no-key APIs
 

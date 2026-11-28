@@ -1,5 +1,43 @@
 # Changelog — Tena Adam (ጤናአዳም)
 
+## v1.4.0 — 2026-11-28 (more features, attractive UI)
+
+- Version 1.4.0, versionCode 6.
+- Splash / onboarding: logo, tagline, 3 swipeable cards (Find care, Talk
+  to a doctor, Track your health), Skip / Get started, shown once
+  (Store.KEY_ONBOARDING_DONE).
+- Home redesign: gradient hero, quick-action chips (Find hospital, Doctor,
+  Live nearby, SOS), daily health tip rotating through the education
+  articles, rounder (20dp) elevated hospital/doctor cards with initials
+  avatars.
+- Dark mode: toggle in Profile → Settings, persisted in Store
+  (Store.KEY_DARK_MODE), applied via Material 3 light + dark colour
+  schemes (TenaLightScheme / TenaDarkScheme in MainActivity). Shared cards
+  (TileCard, InfoCard), Home tiles, bottom bar and scaffold background
+  follow the scheme; some older screens still use light cards.
+- Bottom navigation: bold selected labels, SOS item red; top SOS pill and
+  bottom SOS item now open the new one-tap SOS screen.
+- Appointment calendar: month grid, tap a day, add / cancel, days-until
+  countdown, upcoming list. Reminder: in-app list + notification
+  permission request (POST_NOTIFICATIONS, Android 13+); no AlarmManager /
+  WorkManager in this release (deliberate, to keep the CI build safe).
+- Vaccination reminders: EPI schedule from the child's birth date with
+  due / overdue / done states and Done marking saved on the phone
+  (Store.KEY_VACCINE_DONE).
+- Symptom checker (non-diagnostic): 12 symptoms → suggested specialty +
+  recommended hospitals, emergency banner + call 907 for chest pain,
+  difficulty breathing or heavy bleeding, disclaimer always shown.
+- Daily health tip on Home (article of the day, tap to open).
+- One-tap SOS screen: big 907 / 911 / 991 / 939 cards, Share my location
+  via last-known GPS (permission first; Meskel Square demo location with
+  a clear label when GPS is unavailable).
+- 52 new I18n keys (4 languages each); About screen and Home footer now
+  show v1.4.0. Workflow updated to tag v1.4.0 / artifact
+  tena-adam-v1.4.0-apk (note: the workflow file on GitHub is still the
+  old v1.2.0 version — the GitHub App lacks Workflows permission — so
+  this local update needs a future manual push to take effect).
+- Static check passes (see check_static.py run below).
+
 ## v1.3.0 — 2026-11-28 (live data, professional upgrade)
 
 - Version 1.3.0, versionCode 5. Built via GitHub Actions (release v1.3.0).
