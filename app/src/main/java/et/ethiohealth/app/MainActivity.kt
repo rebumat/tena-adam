@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Tena Adam v1.2.0 — entry point.
+ * Tena Adam v1.3.0 — entry point.
  *
  * Navigation is a simple in-memory back-stack (like v0.1.0). Bottom bar
  * follows the v0.2 screenshots: Home / Assistant / SOS / Profile & Family.
@@ -111,6 +111,13 @@ sealed class Route {
     object Assistant : Route()
     object About : Route()
     object HealthSystem : Route()
+    // v1.3.0 live screens.
+    object LiveNearby : Route()
+    object MedicineInfo : Route()
+    object AirQuality : Route()
+    object Favourites : Route()
+    object BpChart : Route()
+    object Privacy : Route()
 }
 
 /** Bottom navigation items (icon, label key, target route). v1.2.0 uses proper
@@ -154,6 +161,12 @@ fun titleKey(route: Route): String = when (route) {
     Route.Assistant -> "assistant"
     Route.About -> "about"
     Route.HealthSystem -> "health_system"
+    Route.LiveNearby -> "live_nearby"
+    Route.MedicineInfo -> "medicine_info"
+    Route.AirQuality -> "air_weather"
+    Route.Favourites -> "favourites"
+    Route.BpChart -> "chart_title"
+    Route.Privacy -> "privacy"
 }
 
 /** Open the phone dialer with a number (never auto-dials). */
@@ -341,7 +354,7 @@ fun TenaAdamApp(store: Store) {
                 Route.Payments -> PaymentsScreen(lang)
                 Route.FirstAid -> FirstAidScreen(lang)
                 Route.Reminders -> MedicineRemindersScreen(lang, store)
-                Route.BpSugar -> BpSugarScreen(lang, store)
+                Route.BpSugar -> BpSugarScreen(lang, store, ::go)
                 Route.Calculators -> HealthCalculatorsScreen(lang, store, ::go)
                 Route.Mental -> MentalWellbeingScreen(lang)
                 Route.Profile -> ProfileScreen(lang, store, ::go)
@@ -350,6 +363,12 @@ fun TenaAdamApp(store: Store) {
                 Route.Assistant -> AiAssistantScreen(lang, store)
                 Route.About -> AboutScreen(lang)
                 Route.HealthSystem -> HealthSystemScreen(lang)
+                Route.LiveNearby -> LiveNearbyScreen(lang, store)
+                Route.MedicineInfo -> MedicineInfoScreen(lang, store)
+                Route.AirQuality -> AirQualityScreen(lang, store)
+                Route.Favourites -> FavouritesScreen(lang, store)
+                Route.BpChart -> BpChartScreen(lang, store)
+                Route.Privacy -> PrivacyScreen(lang)
             }
         }
     }

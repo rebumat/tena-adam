@@ -25,6 +25,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -448,7 +452,7 @@ fun MedicineRemindersScreen(lang: Lang, store: Store) {
 // ---------------------------------------------------------------------------
 
 @Composable
-fun BpSugarScreen(lang: Lang, store: Store) {
+fun BpSugarScreen(lang: Lang, store: Store, go: (Route) -> Unit = {}) {
     val tr: (String) -> String = { I18n.get(it, lang) }
     var sys by remember { mutableStateOf("") }
     var dia by remember { mutableStateOf("") }
@@ -461,6 +465,8 @@ fun BpSugarScreen(lang: Lang, store: Store) {
     ScrollScreen {
         Text(tr("bp_title"), fontWeight = FontWeight.Bold, fontSize = 19.sp, color = DarkTeal)
         Text(tr("bp_note"), fontSize = 13.sp, color = DarkTeal.copy(alpha = 0.7f))
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedButton(onClick = { go(Route.BpChart) }) { Text(tr("chart_title"), fontSize = 13.sp) }
         Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(value = sys, onValueChange = { sys = it }, label = { Text(tr("systolic")) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         Spacer(modifier = Modifier.height(8.dp))
@@ -765,6 +771,8 @@ fun AiAssistantScreen(lang: Lang, store: Store) {
     var provider by remember { mutableStateOf(store.getString(Store.KEY_AI_PROVIDER, "offline")) }
     var apiKey by remember { mutableStateOf(store.getString(Store.KEY_AI_KEY, "")) }
     var keySaved by remember { mutableStateOf(false) }
+    var isThinking by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val assistant: AiAssistant = remember(provider, apiKey) {
         if (provider != "offline" && apiKey.isNotBlank()) {
@@ -778,7 +786,7 @@ fun AiAssistantScreen(lang: Lang, store: Store) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(tr("assistant_title"), fontWeight = FontWeight.Bold, fontSize = 19.sp, color = DarkTeal, modifier = Modifier.weight(1f))
             Chip(
-                text = tr("assistant_offline"),
+                text = if (provider != "offline" && apiKey.isNotBlank()) tr("ai_online") else tr("assistant_offline"),
                 container = Color(0xFFE8F5E9), content = DarkTeal
             )
         }
@@ -804,6 +812,7 @@ fun AiAssistantScreen(lang: Lang, store: Store) {
                 }
             }
         }
+        if (isThinking) Text(tr("ai_thinking"), fontSize = 13.sp, color = DarkTeal.copy(alpha = 0.7f))
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
@@ -818,10 +827,15 @@ fun AiAssistantScreen(lang: Lang, store: Store) {
             Button(
                 onClick = {
                     val text = input.trim()
-                    if (text.isEmpty()) return@Button
-                    val reply = assistant.answer(text, lang, store)
-                    messages = messages + Msg(true, text) + Msg(false, reply)
+                    if (text.isEmpty() || isThinking) return@Button
+                    messages = messages + Msg(true, text)
                     input = ""
+                    isThinking = true
+                    scope.launch {
+                        val reply = withContext(Dispatchers.IO) { assistant.answer(text, lang, store) }
+                        messages = messages + Msg(false, reply)
+                        isThinking = false
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Teal)
             ) { Text(tr("send")) }
