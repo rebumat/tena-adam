@@ -28,6 +28,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -105,7 +106,8 @@ fun HomeScreen(
             Triple("🗺️", "nearby_map", Route.NearbyMap),
             Triple("📍", "live_nearby", Route.LiveNearby),
             Triple("🛏️", "hospital_beds", Route.Beds),
-            Triple("⭐", "ratings_reviews", Route.Ratings)
+            Triple("⭐", "ratings_reviews", Route.Ratings),
+            Triple("🩺", "symptom_checker", Route.SymptomChecker)
         ),
         "health_services" to listOf(
             Triple("🧪", "lab_tests", Route.LabTests),
@@ -125,7 +127,9 @@ fun HomeScreen(
             Triple("🧮", "health_calculators", Route.Calculators),
             Triple("🧘", "mental_wellbeing", Route.Mental),
             Triple("👨‍👩‍👧", "profile_family", Route.Profile),
-            Triple("❤️", "favourites", Route.Favourites)
+            Triple("❤️", "favourites", Route.Favourites),
+            Triple("📅", "appt_calendar", Route.ApptCalendar),
+            Triple("💉", "vac_reminders", Route.VacReminders)
         ),
         "ai_learn_support" to listOf(
             Triple("🤖", "assistant", Route.Assistant),
@@ -232,6 +236,69 @@ fun HomeScreen(
                 Text("›", fontSize = 26.sp, color = DarkTeal)
             }
         }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // v1.4.0: quick actions — the four most-used destinations, one tap.
+        Text(tr("quick_actions"), fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(
+                Triple("🏥", "find_hospital", Route.Finder()),
+                Triple("👩‍⚕️", "online_doctor", Route.Doctors),
+                Triple("📍", "live_nearby", Route.LiveNearby),
+                Triple("🚨", "sos", Route.Sos)
+            ).forEach { (emoji, key, route) ->
+                Card(
+                    modifier = Modifier.weight(1f).clickable { go(route) },
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(emoji, fontSize = 22.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            tr(key), fontWeight = FontWeight.Bold, fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center, maxLines = 2, minLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // v1.4.0: daily health tip — rotates through the education articles
+        // by day of year. Tap to open the full article.
+        val tipIndex = LocalDate.now().dayOfYear % Data.articles.size
+        val tipArticle = Data.articles[tipIndex]
+        Card(
+            modifier = Modifier.fillMaxWidth().clickable { go(Route.Article(tipIndex)) },
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("💡", fontSize = 28.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(tr("tip_title"), fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color(0xFF6B5B00))
+                    Text(tipArticle.title(lang), fontWeight = FontWeight.Bold, fontSize = 15.sp, color = DarkTeal)
+                    Text(
+                        tipArticle.body(lang).take(110) + "…",
+                        fontSize = 12.sp, color = DarkTeal.copy(alpha = 0.7f),
+                        maxLines = 2, overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
 
         // Upcoming appointments (from saved appointments, with countdown).
         val upcoming = remember(lang) {
@@ -311,7 +378,7 @@ fun HomeScreen(
 
         DisclaimerText(lang)
         Text(
-            text = tr("prototype_v13"),
+            text = tr("prototype_v14"),
             color = DarkTeal.copy(alpha = 0.5f),
             fontSize = 12.sp,
             modifier = Modifier.fillMaxWidth(),
@@ -332,9 +399,9 @@ private fun HomeTile(
 ) {
     Card(
         modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 4.dp),
@@ -351,13 +418,13 @@ private fun HomeTile(
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = DarkTeal,
+                title, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center, maxLines = 2, minLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             if (!subtitle.isNullOrBlank()) {
                 Text(
-                    subtitle, fontSize = 10.sp, color = DarkTeal.copy(alpha = 0.6f),
+                    subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
@@ -463,19 +530,19 @@ fun HospitalCard(lang: Lang, h: Hospital, onClick: () -> Unit) {
     val tr: (String) -> String = { I18n.get(it, lang) }
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("🏥", fontSize = 22.sp)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(h.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = DarkTeal, modifier = Modifier.weight(1f))
+                AvatarCircle(h.name, 44)
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(h.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
             }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(h.area, fontSize = 13.sp, color = DarkTeal.copy(alpha = 0.7f))
             Spacer(modifier = Modifier.height(6.dp))
+            Text(h.area, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Chip(h.tier.label(lang))
                 Chip(
@@ -484,10 +551,10 @@ fun HospitalCard(lang: Lang, h: Hospital, onClick: () -> Unit) {
                 )
                 if (h.fictional) Chip(tr("fictional_sample"), container = Color(0xFFFFF5B8), content = Color(0xFF6B5B00))
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 h.specialties.take(3).joinToString(", ") { it.label(lang) },
-                fontSize = 12.sp, color = DarkTeal.copy(alpha = 0.65f)
+                fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
             )
         }
     }
@@ -672,15 +739,15 @@ fun DoctorsScreen(lang: Lang, store: Store, go: (Route) -> Unit) {
         Data.doctors.forEach { d ->
             Card(
                 modifier = Modifier.fillMaxWidth().clickable { go(Route.Chat(d.id)) },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("👩‍⚕️", fontSize = 22.sp)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(d.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = DarkTeal, modifier = Modifier.weight(1f))
+                        AvatarCircle(d.name, 44)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(d.name, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
                         Chip(
                             text = if (d.online) tr("online") else tr("offline"),
                             container = if (d.online) LeafGreen else Color(0xFFE0E0E0),
@@ -1238,6 +1305,6 @@ fun AboutScreen(lang: Lang) {
         }
         Spacer(modifier = Modifier.height(12.dp))
         DisclaimerText(lang)
-        Text(tr("prototype_v13"), color = DarkTeal.copy(alpha = 0.5f), fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Text(tr("prototype_v14"), color = DarkTeal.copy(alpha = 0.5f), fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
     }
 }
