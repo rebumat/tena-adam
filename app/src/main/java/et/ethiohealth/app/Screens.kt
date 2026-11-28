@@ -103,6 +103,7 @@ fun HomeScreen(
             Triple("👩‍⚕️", "online_doctor", Route.Doctors),
             Triple("💊", "pharmacy", Route.Pharmacy),
             Triple("🗺️", "nearby_map", Route.NearbyMap),
+            Triple("📍", "live_nearby", Route.LiveNearby),
             Triple("🛏️", "hospital_beds", Route.Beds),
             Triple("⭐", "ratings_reviews", Route.Ratings)
         ),
@@ -112,7 +113,9 @@ fun HomeScreen(
             Triple("🚑", "emergency", Route.Emergency),
             Triple("🛡️", "health_insurance", Route.Insurance),
             Triple("💳", "payments", Route.Payments),
-            Triple("🩹", "first_aid", Route.FirstAid)
+            Triple("🩹", "first_aid", Route.FirstAid),
+            Triple("💊", "medicine_info", Route.MedicineInfo),
+            Triple("🌤️", "air_weather", Route.AirQuality)
         ),
         "my_health" to listOf(
             Triple("📋", "records", Route.Records),
@@ -121,7 +124,8 @@ fun HomeScreen(
             Triple("🤰", "maternal", Route.Maternal),
             Triple("🧮", "health_calculators", Route.Calculators),
             Triple("🧘", "mental_wellbeing", Route.Mental),
-            Triple("👨‍👩‍👧", "profile_family", Route.Profile)
+            Triple("👨‍👩‍👧", "profile_family", Route.Profile),
+            Triple("❤️", "favourites", Route.Favourites)
         ),
         "ai_learn_support" to listOf(
             Triple("🤖", "assistant", Route.Assistant),
@@ -130,7 +134,8 @@ fun HomeScreen(
             Triple("📰", "health_news", Route.News),
             Triple("🌐", "language", Route.Language),
             Triple("🏛️", "health_system", Route.HealthSystem),
-            Triple("ℹ️", "about", Route.About)
+            Triple("ℹ️", "about", Route.About),
+            Triple("🔒", "privacy", Route.Privacy)
         )
     )
 
@@ -306,7 +311,7 @@ fun HomeScreen(
 
         DisclaimerText(lang)
         Text(
-            text = tr("prototype_v12"),
+            text = tr("prototype_v13"),
             color = DarkTeal.copy(alpha = 0.5f),
             fontSize = 12.sp,
             modifier = Modifier.fillMaxWidth(),
@@ -504,6 +509,7 @@ fun HospitalDetailScreen(
     val tr: (String) -> String = { I18n.get(it, lang) }
     val context = LocalContext.current
     val h = Data.hospitalById(id)
+    var favSaved by remember { mutableStateOf(h?.let { isFavourite(store, it.id) } ?: false) }
     ScrollScreen {
         if (h == null) {
             Text(tr("no_sample_data"))
@@ -558,6 +564,24 @@ fun HospitalDetailScreen(
             onClick = { openMap(context, h.lat, h.lon, h.name) },
             modifier = Modifier.fillMaxWidth()
         ) { Text("🗺️ ${tr("view_map")}") }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = { openDirections(context, h.lat, h.lon, h.name) },
+                modifier = Modifier.weight(1f)
+            ) { Text(tr("directions"), fontSize = 13.sp) }
+            OutlinedButton(
+                onClick = { shareFacility(context, h.name, h.area, h.lat, h.lon) },
+                modifier = Modifier.weight(1f)
+            ) { Text(tr("share"), fontSize = 13.sp) }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = {
+                favSaved = toggleFavourite(store, "hospital", h.id, h.name, h.area)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text(if (favSaved) tr("remove_favourite") else tr("add_favourite"), fontSize = 13.sp) }
     }
 }
 
@@ -1207,13 +1231,13 @@ fun AboutScreen(lang: Lang) {
         Text(tr("tagline"), fontSize = 15.sp, color = DarkTeal, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(16.dp))
         InfoCard {
-            Text("${tr("about_version")}: 1.1.0", fontSize = 15.sp, color = DarkTeal)
+            Text(tr("about_version"), fontSize = 15.sp, color = DarkTeal)
             Text(tr("about_offline"), fontSize = 14.sp, color = DarkTeal)
             Spacer(modifier = Modifier.height(8.dp))
             Text(tr("about_built_by"), fontSize = 14.sp, color = DarkTeal)
         }
         Spacer(modifier = Modifier.height(12.dp))
         DisclaimerText(lang)
-        Text(tr("prototype_v11"), color = DarkTeal.copy(alpha = 0.5f), fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Text(tr("prototype_v13"), color = DarkTeal.copy(alpha = 0.5f), fontSize = 12.sp, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
     }
 }
