@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path("/home/hatch/workspace/ethiohealth-source/TenaAdam")
+ROOT = Path(__file__).resolve().parent
 KT_DIR = ROOT / "app/src/main/java/et/ethiohealth/app"
 RES = ROOT / "app/src/main/res"
 

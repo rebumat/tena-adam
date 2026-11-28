@@ -1,5 +1,37 @@
 # Changelog — Tena Adam (ጤናአዳም)
 
+## v1.3.0 — 2026-11-28 (live data, professional upgrade)
+
+- Version 1.3.0, versionCode 5. Built via GitHub Actions (release v1.3.0).
+- Live Nearby (Overpass API / OpenStreetMap): real nearby hospitals,
+  pharmacies and clinics sorted by distance from GPS, Meskel Square
+  (9.0054, 38.7636) fallback, cached last-good result, demo data offline.
+  Directions (Google Maps) and Share on every facility and hospital detail.
+- Medicine Info (openFDA drug labels, no key): generic name, purpose,
+  warnings; empty state when nothing is found.
+- Air Quality & Weather (Open-Meteo, no key): US AQI + PM2.5 and current
+  weather for Addis Ababa, with health advice by AQI band; cached fallback.
+- Favourites saved on the phone (hospitals + doctors), toggleable from
+  hospital detail and from the Favourites screen.
+- BP & Sugar chart: simple bar chart of the last 7 logged readings,
+  opened from the BP & Sugar Tracker.
+- Online AI wired: Gemini (gemini-2.0-flash) and Groq
+  (llama-3.3-70b-versatile) via Retrofit, using only the user's own key
+  from AI settings; fallback to the offline assistant on any failure;
+  disclaimer kept on every online reply. No key hardcoded.
+- Privacy screen: location used only on-device for nearby search; no data
+  sent except to the named public APIs (OpenStreetMap, openFDA, Open-Meteo,
+  and Gemini/Groq only when the user enables online AI with their own key).
+- Permissions added: INTERNET, ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION.
+  Dependencies added: Retrofit 2.11.0, converter-gson 2.11.0, OkHttp 4.12.0,
+  kotlinx-coroutines-android 1.8.1 (all compatible with Kotlin 2.0.0 /
+  Compose BOM 2024.09.00 / AGP 8.5.2).
+- Fixed: `check_static.py` failed with KeyError I18n.kt from the repo root
+  (hardcoded path to another checkout); it now resolves paths relative to
+  the script. Static check passes: 319 I18n keys, 37 routes, 38 screens.
+- About screen now shows v1.3.0; Home footer and About use the v1.3.0
+  prototype string.
+
 ## v1.2.0 — 2026-11-26 (professional UI redesign)
 
 - Home screen redesigned to look more attractive and professional: hero card

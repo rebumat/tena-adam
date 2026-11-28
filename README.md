@@ -1,17 +1,54 @@
-# ጤናአዳም — Tena Adam v1.1.0
+# ጤናአዳም — Tena Adam v1.3.0
 
 **Your Health, One Platform** — a professional "super app for health care" for Ethiopia.
 
 Tena Adam helps you find a hospital by disease or condition, talk to a doctor
 (text chat), check pharmacies, call emergency numbers, keep health records,
 follow mother & child care and vaccinations, and learn about health — all in
-one app, in English, Amharic, Afaan Oromo or Tigrinya. Everything works
-**offline**; all data is demo data stored only on the phone.
+one app, in English, Amharic, Afaan Oromo or Tigrinya. It works **offline**
+with demo data stored only on the phone, and **online** it adds live data
+from free public APIs (see "New in v1.3.0" below) with offline fallback.
 
 - Package: `et.ethiohealth.app` (same as v0.1.0, so existing installs update)
-- Version: **1.1.0** (versionCode 2), minSdk 26 (Android 8.0+), targetSdk 34
-- Stack: Kotlin 2.0.0, Jetpack Compose (BOM 2024.09.00), Material 3
+- Version: **1.3.0** (versionCode 5), minSdk 26 (Android 8.0+), targetSdk 34
+- Stack: Kotlin 2.0.0, Jetpack Compose (BOM 2024.09.00), Material 3,
+  Retrofit 2.11.0 + OkHttp + Gson, kotlinx-coroutines-android 1.8.1
 - Built by: Rebuma Tamiru Roro
+
+## New in v1.3.0 — live data, free no-key APIs
+
+All of these work when the phone is online and fall back gracefully offline
+(cached last-good result first, then the offline demo data). No API key is
+needed for any of them; no account is created; no health record leaves the
+phone. See the Privacy screen in the app for the full statement.
+
+- **Live Nearby** — real nearby hospitals, pharmacies and clinics from the
+  Overpass API (OpenStreetMap), sorted by distance from your GPS location
+  (Meskel Square, Addis Ababa, is the fallback when GPS is unavailable).
+  Each facility has Directions (Google Maps) and Share.
+- **Medicine Info** — medicine label information from openFDA
+  (`api.fda.gov/drug/label.json`): generic name, purpose and warnings.
+- **Air Quality & Weather** — live Open-Meteo air quality (US AQI, PM2.5)
+  and weather for Addis Ababa, with health advice by AQI band.
+- **Favourites** — save favourite hospitals and doctors on the phone;
+  also available from any hospital detail screen.
+- **BP & Sugar chart** — a simple bar chart of your logged blood-pressure
+  and blood-sugar readings (last 7), from the BP & Sugar Tracker screen.
+- **Share / Directions** — share any hospital and open Google Maps
+  directions from hospital detail and Live Nearby.
+- **Online AI, wired** — the Gemini (`gemini-2.0-flash`) and Groq
+  (`llama-3.3-70b-versatile`) integration in `AiAssistant.kt` is now
+  implemented via Retrofit, using only the user's own key from AI settings.
+  Any failure falls back to the offline assistant, and every online reply
+  still ends with the "does not diagnose" disclaimer. No key is hardcoded.
+- **Privacy screen** — states that location is used only on-device for
+  nearby search and that no data is sent except to the named public APIs.
+- **Professional polish** — loading / error / empty states on all new
+  screens, Material 3 theme consistency, About screen updated to v1.3.0,
+  INTERNET + location permissions in the manifest.
+- **Static check fixed** — `check_static.py` used a hardcoded path to a
+  different checkout and failed with `KeyError: 'I18n.kt'` from the repo
+  root; it now resolves paths relative to the script itself.
 
 ## ⚠️ Honest note — read first
 
@@ -152,9 +189,10 @@ The assistant works **offline by default** (`AiAssistant.kt`,
 screen, emergency detection → "call 907". It never diagnoses. No internet,
 no key, no network dependency.
 
-**Optional online mode** (clearly marked TODO, not wired to any network
-call): in the app, go to Assistant → AI settings, pick a provider
-(Gemini or Groq) and paste **your own free API key**. Free tiers that fit:
+**Online mode (v1.3.0, wired)** — in the app, go to Assistant → AI settings,
+pick a provider (Gemini or Groq) and paste **your own free API key**. The
+assistant calls the provider over Retrofit/OkHttp and falls back to the
+offline assistant on any failure. Free tiers that fit:
 - **Google Gemini API free tier** — model constant `GEMINI_MODEL =
   "gemini-2.0-flash"` in `AiAssistant.kt`
 - **Groq free tier** — model constant `GROQ_MODEL =
@@ -183,7 +221,7 @@ not break the offline build.
 
 ## Translations
 
-All user-visible strings live in `I18n.kt` (273 keys, 4 translations each:
+All user-visible strings live in `I18n.kt` (319 keys, 4 translations each:
 English, Amharic, Afaan Oromo, Tigrinya — in that order). The v0.1.0
 strings were recovered exactly; the new strings are best-effort drafts in
 the same style. The v0.1.0 note still applies: *"Translations of main
@@ -202,7 +240,8 @@ the mockup's bar.
 
 1. Open this folder in Android Studio (Hedgehog or newer).
 2. Let Gradle sync — the first sync downloads dependencies (needs internet
-   once): Kotlin 2.0.0, AGP 8.5.2, Compose BOM 2024.09.00.
+   once): Kotlin 2.0.0, AGP 8.5.2, Compose BOM 2024.09.00, Retrofit 2.11.0,
+   OkHttp 4.12.0, Gson converter 2.11.0, kotlinx-coroutines-android 1.8.1.
 3. Run on a device or emulator (Android 8.0 / API 26 and newer).
 4. If the first build reports a missing resource, check `res/` — it was
    recovered from the APK and contains library leftovers (notification
@@ -221,14 +260,19 @@ TenaAdam/
 └── app/
     ├── build.gradle.kts
     └── src/main/
-        ├── AndroidManifest.xml        # versionCode 2, versionName 1.1.0
+        ├── AndroidManifest.xml        # versionCode 5, versionName 1.3.0
         ├── java/et/ethiohealth/app/
         │   ├── MainActivity.kt        # nav stack, scaffold, theme, bottom bar
         │   ├── Screens.kt             # Home + v0.1.0 screens + HealthSystem + About
         │   ├── NewScreens.kt          # all v0.2 / v1.1.0 screens
+        │   ├── RealtimeScreens.kt     # v1.3.0 live screens + Favourites/Chart/Privacy
+        │   ├── ApiClient.kt           # v1.3.0 Retrofit clients (Overpass, Nominatim,
+        │   │                          #   openFDA, Open-Meteo, Gemini, Groq)
+        │   ├── RealtimeRepository.kt  # v1.3.0 live fetch + cache + offline fallback
+        │   ├── RealtimeViewModels.kt  # v1.3.0 view models for the live screens
         │   ├── Data.kt                # hospitals, doctors, pharmacies, articles…
-        │   ├── I18n.kt                # all strings, 4 languages
-        │   ├── AiAssistant.kt         # offline assistant + online TODO stub
+        │   ├── I18n.kt                # all strings, 4 languages (319 keys)
+        │   ├── AiAssistant.kt         # offline assistant + wired online mode
         │   ├── Models.kt              # Lang, Specialty, FacilityTier, models
         │   └── Store.kt               # on-phone SharedPreferences JSON store
         └── res/

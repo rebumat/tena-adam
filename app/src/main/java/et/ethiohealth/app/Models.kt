@@ -127,6 +127,39 @@ data class Vaccine(
 
 data class Msg(val fromMe: Boolean, val text: String)
 
+/** v1.3.0 live data. All of these come from free, no-key public APIs;
+ *  when the network fails the app falls back to the offline demo data. */
+data class LiveFacility(
+    val id: String,
+    val name: String,
+    val type: String,
+    val lat: Double,
+    val lon: Double,
+    val distanceKm: Double,
+    val area: String = ""
+)
+
+data class MedicineInfo(
+    val genericName: String,
+    val brandName: String,
+    val purpose: String,
+    val warnings: String,
+    val dosage: String = ""
+)
+
+data class AirWeather(
+    val aqi: Int,
+    val pm25: Double,
+    val temperature: Double,
+    val humidity: Int,
+    val windKmh: Double,
+    val weatherCode: Int,
+    val isLive: Boolean = true
+) {
+    /** 0 = good, 1 = moderate, 2 = unhealthy (int, not a string key). */
+    fun aqiCategory(): Int = if (aqi <= 50) 0 else if (aqi <= 100) 1 else 2
+}
+
 data class Tile(val emoji: String, val key: String, val color: Long, val route: Route)
 
 /** A common laboratory test, with a one-line explanation in all 4 languages. */

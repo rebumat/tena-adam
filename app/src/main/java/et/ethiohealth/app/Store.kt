@@ -74,5 +74,9 @@ class Store(context: Context) {
         const val KEY_PROFILE_PHONE = "profile_phone"
         const val KEY_AI_PROVIDER = "ai_provider"
         const val KEY_AI_KEY = "ai_api_key"
+        // v1.3.0: favourites + last-good live-API caches (offline fallback).
+        const val KEY_FAVOURITES = "favourites"
+        const val KEY_CACHE_NEARBY = "cache_nearby"
+        const val KEY_CACHE_AIR = "cache_air"
     }
 }

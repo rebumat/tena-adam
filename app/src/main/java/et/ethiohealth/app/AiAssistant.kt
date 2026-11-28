@@ -8,15 +8,14 @@ package et.ethiohealth.app
  * points to the right screen (hospital finder, pharmacy, CBHI, blood bank...),
  * and detects emergencies ("call 907").
  *
- * Optional ONLINE mode (TODO, clearly marked): if the user pastes his own
- * free API key in Settings, OnlineAiAssistant can call a free-tier LLM.
+ * Optional ONLINE mode (v1.3.0, wired): if the user pastes his own
+ * free API key in Settings, OnlineAiAssistant calls a free-tier LLM
+ * via Retrofit (see RealtimeRepository.geminiAnswer / groqAnswer).
  * Supported free tiers to document in README:
  *   - Google Gemini API free tier (model name is a constant below).
  *   - Groq free tier (model name is a constant below).
- * Do NOT invent key values, endpoints or prices. The integration is a stub:
- * it throws NotImplementedError with the exact file/method to fill in.
- * Adding it must NOT break the offline build — no new Gradle dependency
- * is added by this file.
+ * Do NOT invent key values, endpoints or prices. On any failure the
+ * assistant falls back to the offline rules, so the app never breaks.
  */
 interface AiAssistant {
     /** Answer a user message, given the current language and store (for reminders etc.). */
@@ -71,20 +70,13 @@ class OfflineAssistant : AiAssistant {
 }
 
 /**
- * OPTIONAL online mode — TODO, not wired to any network call.
+ * v1.3.0 online mode — wired via Retrofit in [RealtimeRepository].
  *
- * To enable (in Android Studio, after the user pastes his own free key in
- * Settings → AI Assistant):
- *   1. Add the HTTP client dependency in app/build.gradle.kts (e.g. OkHttp).
- *   2. Implement [answer] below: POST the user message to the provider's
- *      chat endpoint with [model], using [apiKey] as the bearer token.
- *   3. Keep the disclaimer: the reply must still say it is general
- *      information, not a diagnosis.
- *   4. If the network call fails, fall back to [OfflineAssistant].
- *
- * Free tiers that fit (documented in README, no prices invented):
- *   - Google Gemini API free tier — model: "gemini-2.0-flash".
- *   - Groq free tier — model: "llama-3.3-70b-versatile".
+ * The user pastes his own free API key in Assistant → Online AI settings;
+ * the key is stored on the phone only and never hardcoded. Gemini uses
+ * [GEMINI_MODEL], Groq uses [GROQ_MODEL]. Every online call has a timeout;
+ * on any failure [answer] falls back to [OfflineAssistant], and the reply
+ * always ends with the "does not diagnose" disclaimer.
  */
 class OnlineAiAssistant(
     private val provider: String,
@@ -106,8 +98,22 @@ class OnlineAiAssistant(
         }
 
     override fun answer(message: String, lang: Lang, store: Store): String {
-        // TODO: implement the online call (see class comment). Until then,
-        // always fall back to the offline assistant so the app never breaks.
-        return offline.answer(message, lang, store)
+        if (apiKey.isBlank()) return offline.answer(message, lang, store)
+        // The chat screen calls this from a coroutine on Dispatchers.IO, so
+        // blocking here does not freeze the UI. Any failure falls back.
+        val online: String? = try {
+            kotlinx.coroutines.runBlocking {
+                when (provider) {
+                    "groq" -> RealtimeRepository.groqAnswer(apiKey, message, lang)
+                    else -> RealtimeRepository.geminiAnswer(apiKey, message, lang)
+                }
+            }
+        } catch (_: Exception) {
+            null
+        }
+        val reply = online?.trim().orEmpty()
+        if (reply.isEmpty()) return offline.answer(message, lang, store)
+        val disclaimer = I18n.get("disclaimer", lang)
+        return if (reply.contains(disclaimer)) reply else "$reply\n\n$disclaimer"
     }
 }
